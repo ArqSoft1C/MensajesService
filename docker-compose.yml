@@ -1,0 +1,24 @@
+version: '2'
+
+services:
+  messages:
+    build: ./Docker
+      
+    depends_on:
+      - mongodb
+    links:
+      - mongodb
+        
+    ports:
+      - "3011:3011"
+
+    tty: true
+  
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - "mongodata:/data/db"
+volumes:
+   mongodata:
