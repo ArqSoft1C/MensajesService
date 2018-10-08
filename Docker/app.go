@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"goji.io"
 	"goji.io/pat"
@@ -35,10 +34,8 @@ type MENSAJE struct {
 }
 
 func main() {
-	duration := time.Duration(15)*time.Second
-  	time.Sleep(duration)
-  	
-	session, err := mgo.Dial("192.168.99.102:27017")
+
+	session, err := mgo.Dial("mongo_db:27017")
 	if err != nil {
 		fmt.Printf("no funciono")
 		panic(err)
@@ -47,22 +44,24 @@ func main() {
 
 	session.SetMode(mgo.Monotonic, true)
 	ensureIndex(session)
+
 	mux := goji.NewMux()
 
 	mux.HandleFunc(pat.Get("/mensajes"), allMessages(session))
 	mux.HandleFunc(pat.Post("/mensajes"), addMessage(session))
 	//mux.HandleFunc(pat.Put("/mensajes/:id"), updateBook(session))
-	//mux.HandleFunc(pat.Delete("/mensajes/:id"), deleteBook(session))
+	mux.HandleFunc(pat.Delete("/mensajes/:id"), deleteBook(session))
 
-	s := &http.Server{
-		Addr:           ":3011",
-		Handler:        mux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
+	http.ListenAndServe(":4003", mux)
+	//s := &http.Server{
+	//	Addr:           ":4003",
+	//	Handler:        mux,
+	//	ReadTimeout:    10 * time.Second,
+	//	WriteTimeout:   10 * time.Second,
+	//	MaxHeaderBytes: 1 << 20,
+	//}
 
-	s.ListenAndServe()
+	//s.ListenAndServe()
 
 }
 
@@ -120,6 +119,32 @@ func allMessages(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		ResponseWithJSON(w, respBody, http.StatusOK)
+	}
+}
+
+func deleteBook(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session := s.Copy()
+		defer session.Close()
+
+		id := pat.Param(r, "id")
+
+		c := session.DB("Message_db").C("mensajes")
+
+		err := c.Remove(bson.M{"id": id})
+		if err != nil {
+			switch err {
+			default:
+				ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+				log.Println("Failed deleting message: ", err)
+				return
+			case mgo.ErrNotFound:
+				ErrorWithJSON(w, "message not found", http.StatusNotFound)
+				return
+			}
+		}
+
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

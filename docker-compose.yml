@@ -1,20 +1,22 @@
 version: '2'
 
 services:
-  messages:
+  mensajes_ms:
     build: ./Docker
-      
+
     depends_on:
-      - mongodb
+      - mongo_db
+
     links:
-      - mongodb
+      - mongo_db
         
     ports:
-      - "3011:3011"
+      - "4003:4003"
 
     tty: true
-  
-  mongodb:
+
+
+  mongo_db:
     image: mongo
     ports:
       - "27017:27017"

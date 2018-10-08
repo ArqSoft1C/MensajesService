@@ -3,12 +3,12 @@
 swagger: '2.0'
 info:
   version: 1.0.0
-  title: Microservice for Courses
-  description: Java + MySQL
+  title: Microservice messages
+  description: golang + Mongo
   license:
     name: Software Architecture 2018-II
-host: 192.168.99.101:3000
-basePath: /courses-ms/resources
+host: 192.168.99.1:4003
+basePath: /
 schemes:
   - http
 consumes:
@@ -16,20 +16,22 @@ consumes:
 produces:
   - application/json
 paths:
-  /courses:
+  /mensajes:
     post:
-      summary: Creates a new course
-      operationId: createCourse
+      summary: Creates a new message
+      operationId: createmessage
       parameters:
-        - name: course
+        - name: message
           in: body
           required: true
-          description: Course Object
+          description: message Object
           schema:
-            $ref: '#/definitions/CourseInput'
+            $ref: '#/definitions/MensajeInput'
       responses:
         '201':
           description: Created
+          schema:
+            $ref: '#/definitions/Mensaje'
         '400':
           description: Bad Request
           schema:
@@ -39,13 +41,13 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
     get:
-      summary: Returns all courses
-      operationId: getAllCourses
+      summary: Returns all messages
+      operationId: getAllmessages
       responses:
         '200':
           description: Ok
           schema:
-            $ref: '#/definitions/CoursesList'
+            $ref: '#/definitions/MensajesList'
         '406':
           description: Not Acceptable (Invalid Params)
           schema:
@@ -55,85 +57,30 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
 
-  /courses/{code}:
-    get:
-      summary: Returns a course with the given code
-      operationId: getCourseByCode
-      parameters:
-        - name: code
-          in: path
-          description: The code of the course to be returned
-          required: true
-          type: integer
-      responses:
-        '200':
-          description: Ok
-          schema:
-            $ref: '#/definitions/Course'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '406':
-            description: Not Acceptable (Invalid Params)
-            schema:
-              $ref: '#/definitions/ErrorModel'
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
-
-    put:
-      summary: Updates a course with the given code
-      operationId: updateCourse
-      parameters:
-        - name: code
-          in: path
-          description: The code of the course to be updated
-          required: true
-          type: integer
-        - name: course
-          in: body
-          required: true
-          description: Course Object
-          schema:
-            $ref: '#/definitions/CourseInput'
-      responses:
-        '204':
-          description: No Content
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorModel'
-        '406':
-            description: Not Acceptable (Invalid Params)
-            schema:
-              $ref: '#/definitions/ErrorModel'
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/ErrorModel'
+  /mensajes/{code}:
 
     delete:
-      summary: Deletes a course with the given code
-      operationId: deleteCourse
+      summary: Deletes a message with the given code
+      operationId: deletemessage
       parameters:
         - name: code
           in: path
-          description: The code of the course to be deleted
+          description: The code of the message to be deleted
           required: true
           type: integer
       responses:
         '200':
           description: Ok
+          schema:
+            $ref: '#/definitions/messageCode'
         '404':
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorModel'
         '406':
-            description: Not Acceptable (Invalid Params)
-            schema:
-              $ref: '#/definitions/ErrorModel'
+          description: Not Acceptable (Invalid Params)
+          schema:
+            $ref: '#/definitions/ErrorModel'
         '500':
           description: unexpected error
           schema:
@@ -141,30 +88,37 @@ paths:
 
 definitions:
 
-  # Courses
-  Course:
+  # messages
+  Mensaje:
+
     type: object
     properties:
-      code:
-        type: integer
-      name:
+      id:
         type: string
-      credits:
-        type: integer
-      cupos:
-        type: integer
+      usuario1:
+        type: string
+      usuario2:
+        type: string
+      asunto:
+        type: string
+      contenido:
+        type: string
 
-  CourseInput:
+  MensajeInput:
     type: object
     properties:
-      name:
+      id:
         type: string
-      credits:
-        type: integer
-      cupos:
-        type: integer
+      usuario1:
+        type: string
+      usuario2:
+        type: string
+      asunto:
+        type: string
+      contenido:
+        type: string
 
-  CoursesList:
+  MensajesList:
     type: object
     required:
       - total
@@ -175,7 +129,13 @@ definitions:
       list:
         type: array
         items:
-          $ref: '#/definitions/Course'
+          $ref: '#/definitions/Mensaje'
+
+  messageCode:
+    type: object
+    properties:
+      code:
+        type: integer
 
 # Errors
   ErrorModel:
