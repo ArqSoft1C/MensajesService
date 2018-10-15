@@ -13,6 +13,8 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+var Newid int
+
 func ErrorWithJSON(w http.ResponseWriter, message string, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
@@ -26,11 +28,11 @@ func ResponseWithJSON(w http.ResponseWriter, json []byte, code int) {
 }
 
 type MENSAJE struct {
-	ID        string `json:"id"`
-	Usuario1  string `json:"usuario1"`
-	Usuario2  string `json:"usuario2"`
-	Asunto    string `json:"asunto"`
-	Contenido string `json:"contenido"`
+	ID        bson.ObjectId `bson:"_id,omitempty"`
+	Usuario1  string        `json:"usuario1"`
+	Usuario2  string        `json:"usuario2"`
+	Asunto    string        `json:"asunto"`
+	Contenido string        `json:"contenido"`
 }
 
 func main() {
@@ -43,14 +45,13 @@ func main() {
 	defer session.Close()
 
 	session.SetMode(mgo.Monotonic, true)
-	ensureIndex(session)
 
 	mux := goji.NewMux()
 
 	mux.HandleFunc(pat.Get("/mensajes"), allMessages(session))
 	mux.HandleFunc(pat.Post("/mensajes"), addMessage(session))
 	//mux.HandleFunc(pat.Put("/mensajes/:id"), updateBook(session))
-	mux.HandleFunc(pat.Delete("/mensajes/:id"), deleteBook(session))
+	mux.HandleFunc(pat.Delete("/mensajes/:id"), deleteMessage(session))
 
 	http.ListenAndServe(":4003", mux)
 	//s := &http.Server{
@@ -71,12 +72,14 @@ func addMessage(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 		defer session.Close()
 
 		var mensaje MENSAJE
+
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&mensaje)
 		if err != nil {
 			ErrorWithJSON(w, "Incorrect body", http.StatusBadRequest)
 			return
 		}
+		// connect AutoIncrement to collection "counters"
 
 		c := session.DB("Message_db").C("mensajes")
 
@@ -93,7 +96,7 @@ func addMessage(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Location", r.URL.Path+"/"+mensaje.ID)
+		w.Header().Set("Location", r.URL.Path+"/"+string(mensaje.ID))
 		w.WriteHeader(http.StatusCreated)
 	}
 }
@@ -122,16 +125,17 @@ func allMessages(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func deleteBook(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+func deleteMessage(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session := s.Copy()
 		defer session.Close()
 
 		id := pat.Param(r, "id")
+		//bsonObjectID := bson.ObjectIdHex(id)
 
 		c := session.DB("Message_db").C("mensajes")
 
-		err := c.Remove(bson.M{"id": id})
+		err := c.Remove(bson.M{"_id": bson.ObjectIdHex(string(id))})
 		if err != nil {
 			switch err {
 			default:
@@ -148,6 +152,7 @@ func deleteBook(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
 func ensureIndex(s *mgo.Session) {
 	session := s.Copy()
 	defer session.Close()
@@ -166,3 +171,4 @@ func ensureIndex(s *mgo.Session) {
 		panic(err)
 	}
 }
+*/
