@@ -37,7 +37,7 @@ type MESSAGE struct {
 
 func main() {
 
-	session, err := mgo.Dial("mongo_db:27017")
+	session, err := mgo.Dial("192.168.99.102:27017")
 	if err != nil {
 		fmt.Printf("no funciono")
 		panic(err)
@@ -108,15 +108,15 @@ func allMessages(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 
 		c := session.DB("Message_db").C("mensajes")
 
-		var messages []MESSAGE
-		err := c.Find(bson.M{}).All(&messages)
+		var message []MESSAGE
+		err := c.Find(bson.M{}).All(&message)
 		if err != nil {
 			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
 			log.Println("Failed get all messages: ", err)
 			return
 		}
 
-		respBody, err := json.MarshalIndent(messages, "", "  ")
+		respBody, err := json.MarshalIndent(message, "", "  ")
 		if err != nil {
 			log.Fatal(err)
 		}
