@@ -37,7 +37,7 @@ type MESSAGE struct {
 
 func main() {
 
-	session, err := mgo.Dial("mongo_db:27017")
+	session, err := mgo.Dial("192.168.99.102:27017")
 	if err != nil {
 		fmt.Printf("no funciono")
 		panic(err)
@@ -50,10 +50,10 @@ func main() {
 
 	mux.HandleFunc(pat.Get("/message"), allMessages(session))
 	mux.HandleFunc(pat.Post("/message"), addMessage(session))
-	//mux.HandleFunc(pat.Put("/mensajes/:id"), updateBook(session))
+	mux.HandleFunc(pat.Get("/message/user/:id"), userMessage(session))
 	mux.HandleFunc(pat.Delete("/message/:id"), deleteMessage(session))
 
-	http.ListenAndServe(":4003", mux)
+	http.ListenAndServe(":4014", mux)
 	//s := &http.Server{
 	//	Addr:           ":4003",
 	//	Handler:        mux,
@@ -117,6 +117,32 @@ func allMessages(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
 			log.Println("Failed get all messages: ", err)
+			return
+		}
+
+		respBody, err := json.MarshalIndent(messages, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ResponseWithJSON(w, respBody, http.StatusOK)
+	}
+}
+
+func userMessage(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session := s.Copy()
+		defer session.Close()
+		user := pat.Param(r, "id")
+
+		c := session.DB("Message_db").C("mensajes")
+
+		var messages []MESSAGE
+		//err := c.Find(bson.M{}).All(&messages)
+		err := c.Find(bson.M{"user1": user}).All(&messages)
+		if err != nil {
+			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+			log.Println("Failed get user messages: ", err)
 			return
 		}
 
