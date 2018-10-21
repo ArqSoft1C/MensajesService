@@ -125,7 +125,13 @@ func allMessages(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		ResponseWithJSON(w, respBody, http.StatusOK)
+		if string(respBody) == "null" {
+			fmt.Fprint(w, "[]")
+		} else {
+			ResponseWithJSON(w, respBody, http.StatusOK)
+		}
+
+		//fmt.Fprint(w, string(respBody))
 	}
 }
 
