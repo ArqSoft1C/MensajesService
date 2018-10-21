@@ -37,7 +37,7 @@ type MESSAGE struct {
 
 func main() {
 
-	session, err := mgo.Dial("192.168.99.102:27017")
+	session, err := mgo.Dial("mongo_db:27017")
 	if err != nil {
 		fmt.Printf("no funciono")
 		panic(err)
@@ -53,7 +53,7 @@ func main() {
 	mux.HandleFunc(pat.Get("/message/user/:id"), userMessage(session))
 	mux.HandleFunc(pat.Delete("/message/:id"), deleteMessage(session))
 
-	http.ListenAndServe(":4014", mux)
+	http.ListenAndServe(":4003", mux)
 	//s := &http.Server{
 	//	Addr:           ":4003",
 	//	Handler:        mux,
