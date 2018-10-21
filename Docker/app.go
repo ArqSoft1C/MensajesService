@@ -82,7 +82,7 @@ func addMessage(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 		// connect AutoIncrement to collection "counters"
 
 		c := session.DB("Message_db").C("mensajes")
-
+		message.ID = bson.NewObjectId()
 		err = c.Insert(message)
 		if err != nil {
 			if mgo.IsDup(err) {
@@ -94,7 +94,11 @@ func addMessage(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 			log.Println("Failed insert message: ", err)
 			return
 		}
-
+		respBody, err := json.MarshalIndent(message, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		ResponseWithJSON(w, respBody, http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Location", r.URL.Path+"/"+string(message.ID))
 		w.WriteHeader(http.StatusCreated)
