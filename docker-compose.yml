@@ -1,13 +1,13 @@
 version: '2'
 
 services:
-  mensajes_ms:
+  messages-ms:
     build: .
     depends_on:
-      - mongo_db
+      - mongo-db
 
     links:
-      - mongo_db
+      - mongo-db
         
     ports:
       - "4003:4003"
@@ -15,7 +15,7 @@ services:
     tty: true
 
 
-  mongo_db:
+  mongo-db:
     image: mongo
     ports:
       - "27017:27017"
