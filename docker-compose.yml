@@ -2,8 +2,7 @@ version: '2'
 
 services:
   mensajes_ms:
-    build: ./Docker
-
+    build: .
     depends_on:
       - mongo_db
 
