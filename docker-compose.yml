@@ -12,9 +12,6 @@ services:
     ports:
       - "4003:4003"
 
-    tty: true
-
-
   mongo-db:
     image: mongo
     ports:
