@@ -37,7 +37,7 @@ type MESSAGE struct {
 
 func main() {
 
-	session, err := mgo.Dial("mongo_db:27017")
+	session, err := mgo.Dial("mongo-db:27017")
 	if err != nil {
 		fmt.Printf("no funciono")
 		panic(err)
