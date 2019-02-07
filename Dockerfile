@@ -12,3 +12,4 @@ RUN go get -d -v goji.io \
 ADD . src
 #run app.go
 CMD ["go","run","src/app.go"]
+EXPOSE 4003
