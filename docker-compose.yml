@@ -1,18 +1,20 @@
 version: '2'
 
 services:
+
   messages-ms:
+    container_name: messages-ms
     build: .
     depends_on:
-      - mongo-db
+      - messages-db
 
     links:
-      - mongo-db
-        
+      - messages-db
+
     ports:
       - "4003:4003"
 
-  mongo-db:
+  messages-db:
     image: mongo
     ports:
       - "27017:27017"
