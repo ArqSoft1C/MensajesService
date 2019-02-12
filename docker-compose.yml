@@ -4,18 +4,18 @@ services:
   mensajes_ms:
     build: .
     depends_on:
-      - mongo_db
+      - messages_db
 
     links:
-      - mongo_db
-        
+      - messages_db
+
     ports:
       - "4003:4003"
 
     tty: true
 
 
-  mongo_db:
+  messages_db:
     image: mongo
     ports:
       - "27017:27017"
