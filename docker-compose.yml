@@ -1,7 +1,9 @@
 version: '2'
 
 services:
-  mensajes_ms:
+
+  messages-ms:
+    container_name: messages-ms
     build: .
     depends_on:
       - messages_db
